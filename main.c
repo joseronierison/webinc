@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 {
 	int Socket, Bind, Listen, Coisa;
 	int tamanho, NewSocket, out_size, numbytes;
-	struct sockaddr_in endereco_dele;
+	struct sockaddr_in client_addres;
 	char *out;
 	char buf[MAXDATASIZE];
 
@@ -24,17 +24,17 @@ int main(int argc, char const *argv[])
   	// Set Connections limit
 	Listen = listen_socket(Socket, MAX_CONNECTIONS);
 
-	printf("%s\n", "Está funcionando!");
+	printf("%s\n", "It works!");
 
 
 	  while(1) {
 	    tamanho = sizeof(struct sockaddr_in);
-	    if ((NewSocket = accept(Socket, (struct sockaddr *)&endereco_dele,&tamanho)) < 0){
+	    if ((NewSocket = accept(Socket, (struct sockaddr *)&client_addres,&tamanho)) < 0){
 	      perror("accept");
 	      continue;
 	    }
 	    
-	    printf("HTTP/1.1 200 OK\r\n",inet_ntoa(endereco_dele.sin_addr));
+	    printf("HTTP/1.1 200 OK\r\n",inet_ntoa(client_addres.sin_addr));
 
 
 	    out = "HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=utf-8\r\nConnection: close\r\n\r\n<input name='outro' />";
@@ -42,25 +42,30 @@ int main(int argc, char const *argv[])
 	    out_size = strlen(out);
 
 	    if (!fork()) {
-	      if (send(NewSocket, out, out_size, 0) == -1)
-	      {
+	    	memset(&buf[0], 0, sizeof(buf));
 
-	        perror("send");
-	        close(NewSocket);
-	        exit(0);
-	      }
+			if ((numbytes=read(NewSocket, &buf, sizeof buf)) == -1) 
+			{
+			    perror("read");
+			    close(NewSocket);
+			    exit(1);
+			}
+
+		    buf[numbytes] = '\0';
+		    
+		    printf("%s\n",buf);
+
+			if (send(NewSocket, out, out_size, 0) == -1)
+			{
+				perror("send");
+				close(NewSocket);
+				exit(0);
+			}
 	    }
 
-	    if ((numbytes=recv(NewSocket, buf, sizeof buf, MSG_DONTWAIT)) == -1) 
-	    {
-	        perror("recv");
-	        exit(1);
-	    }
-	    buf[numbytes] = '\0';
-	    printf("%s",buf);
 	    close(NewSocket);
 
-	    while(waitpid(-1,NULL,WNOHANG) > 0); /* Limpa o processo crianca.fork() */
+	    while(waitpid(-1,NULL,WNOHANG) > 0); 
 	  }	
 
 	return 0;
