@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "helpers/sockets.c"
 
 // Defaults
@@ -7,9 +9,12 @@
 #define MAX_CONNECTIONS 80
 #define MAXDATASIZE 5000
 
+char* inet_ntoa();
+
 int main(int argc, char const *argv[]) {
-	int Socket, Bind, Listen, Coisa;
-	int tamanho, NewSocket, out_size, numbytes;
+	int Socket, Bind, Listen;
+	int NewSocket, out_size, numbytes;
+  unsigned int sock_size;
 	struct sockaddr_in client_addres;
 	char *out;
 	char buf[MAXDATASIZE];
@@ -26,14 +31,14 @@ int main(int argc, char const *argv[]) {
 	printf("%s\n", "It works!");
 
   while(1) {
-    tamanho = sizeof(struct sockaddr_in);
+    sock_size = sizeof(struct sockaddr_in);
 
-    if ((NewSocket = accept(Socket, (struct sockaddr *)&client_addres,&tamanho)) < 0) {
+    if ((NewSocket = accept(Socket, (struct sockaddr *)&client_addres,&sock_size)) < 0) {
       perror("accept");
       continue;
     }
 
-    printf("HTTP/1.1 200 OK\r\n",inet_ntoa(client_addres.sin_addr));
+    printf("HTTP/1.1 200 OK %s \r\n", inet_ntoa(client_addres.sin_addr));
 
 
     out = "HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=utf-8\r\nConnection: close\r\n\r\n<h1>It works</h1>";
