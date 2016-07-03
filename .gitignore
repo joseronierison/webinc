@@ -32,3 +32,12 @@
 # Debug files
 *.dSYM/
 *.su
+
+#make files
+CMakeFiles
+*.cmake
+Makefile
+CMakeCache.txt
+
+#Executable
+Webinc
