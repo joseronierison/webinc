@@ -1,0 +1,7 @@
+#include "../../src/helpers/sockets.h"
+
+#test sum2test
+    fail_unless(sum_ab(3, 2) == 5, "sum_ab function borked");
+    fail_unless(sum_ab(-3, 2) == -1, "sum_ab function borked");
+    fail_unless(sum_ab(3, -2) == 1, "sum_ab function borked");
+    fail_unless(sum_ab(-3, -2) == -5, "sum_ab function borked");
